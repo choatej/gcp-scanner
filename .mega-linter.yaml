@@ -1,0 +1,37 @@
+megalinter:
+  # General settings
+  files:
+    include:
+      - "**/*"  # Include all files in the repo
+
+  # Linter configurations
+  linters:
+    eslint:
+      enabled: true
+      config_file: .eslintrc.json
+    flake8:
+      enabled: true
+      config_file: .flake8
+
+  # Global options
+  options:
+    concurrency: 4
+
+  # Exclude specific paths or files if needed
+  exclude_paths:
+    - "node_modules/**"
+
+  # Language specific configurations
+  languages:
+    nodejs:
+      files:
+        include:
+          - "**/*.js"
+      linters:
+        - eslint
+    python:
+      files:
+        include:
+          - "**/*.py"
+      linters:
+        - flake8

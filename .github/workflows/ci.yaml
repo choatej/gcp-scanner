@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+  setup-node:
+    runs-on: ubuntu-latest
+    needs: [checkout]
+    steps:
+      - name: Read Node.js version from .node-version
+        id: node_version
+        run: echo ::set-output name=node_version::$(cat .node-version)
+        working-directory: ./visualizer
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: ${{ steps.node_version.outputs.node_version }}
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./visualizer
+
+  setup-python:
+    runs-on: ubuntu-latest
+    needs: [checkout]
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+        working-directory: ./scanner
+
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: [setup-node, setup-python]
+    steps:
+      - name: Install Megalinter and run
+        run: |
+          curl -sL https://raw.githubusercontent.com/nvuillam/mega-linter/master/install.sh | bash
+          ./bin/mega-linter-runner
+
+  build-test-react:
+    runs-on: ubuntu-latest
+    needs: [setup-node]
+    steps:
+    - name: build
+      run: npm run build
+      working-directory: ./visualizer
+    - name: test
+      run: npm test
+      working-directory: ./visualizer
+
+  test-python:
+      runs-on: ubuntu-latest
+      needs: [setup-python]
+      steps:
+        - name: test
+          run: pytest -s -v
+
+  package-react:
+    runs-on: ubuntu-latest
+    needs: [build-test-react]
+    steps:
+      - name: package
+        run: npm run package
+        working-directory: ./visualizer
+      - name: container
+        run: npm run docker
