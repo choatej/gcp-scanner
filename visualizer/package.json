@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.0-placeholder-for-preset-env.2",
+    "@microlink/react-json-view": "^1.23.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -11,18 +12,25 @@
     "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
     "react-snap": "^1.23.0",
-    "serve": "^14.2.3",
-    "@microlink/react-json-view": "^1.23.1"
+    "serve": "^14.2.3"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --passWithNoTests",
+    "test:dev": "react-scripts test --testResultsProcessor=jest-junit --watchAll=false --coverage --passWithNoTests 2>&1",
     "test:watch": "npm test --watch",
     "test:coverage": "npm test --coverage",
     "eject": "react-scripts eject",
     "docker": "docker build .",
-    "package": "zip -r choatej-visualizer.zip build README.md LICENSE.md"
+    "package": "zip -r choatej-visualizer.zip build README.md LICENSE.md",
+    "format": "prettier --write \"src\"",
+    "lint": "npm-run-all lint:eslint lint:prettier",
+    "lint:fix": "npm-run-all lint:fix:eslint lint:fix:prettier",
+    "lint:eslint": "eslint --ext .ts,.js,.tsx,.jsx ${ESLINT_OPTS} .; exit 0",
+    "lint:prettier": "prettier --check '{src,test}/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix:eslint": "eslint --ext .ts,.js,.tsx,.jsx --fix ${ESLINT_OPTS} .",
+    "lint:fix:prettier": "prettier --write '{src,test}/**/*.{js,jsx,ts,tsx}'"
   },
   "eslintConfig": {
     "extends": [
@@ -41,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "jest-junit": "^16.0.0"
   }
 }
