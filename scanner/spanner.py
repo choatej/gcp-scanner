@@ -51,11 +51,13 @@ def get_projects():
             projects.extend(response['projects'])
         request = service.projects().list_next(previous_request=request,
                                                previous_response=response)
-    # filter out projects with sandbox in the id
-    projects = [project for project in projects if not
+    return filter_projects(projects)
+
+
+def filter_projects(projects):
+    return [project for project in projects if not
                 ('sandbox' in project['projectId'] or
                  project['projectId'].startswith('sys-'))]
-    return projects
 
 
 def describe_project(project_id):

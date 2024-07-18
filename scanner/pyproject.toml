@@ -1,48 +1,51 @@
 [tool.poetry]
 name = "scanner"
-dynamic = ["version"]
+version = "0.1.0"
 description = "A tool for searching for GCP resources across multiple projects."
-authors = [
-    { name = "Jon Choate", email = "choatej@gmail.com" }
-]
 license = "Apache-2.0"
+package-mode = false
 readme = "README.md"
 keywords = [
     "Google Cloud",
     "GCP",
     "Infrastructure"
 ]
+authors = [
+    "Jon Choate <choatej@gmail.com>"
+]
+homepage = "https://github.com/choatej/gcp-scanner"
+repository = "https://github.com/choatej/gcp-scanner.git"
+documentation = "https://github.com/choatej/gcp-scanner/blob/main/README.md"
+
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Cloud Engineers",
-    "Topic :: Software Development :: Infrastructure Tools",
-    "License :: OSI Approved :: Apache Software License 2.0 (Apache-2.0)",
-    "Programming Language :: Python :: 3.12",
+"Development Status :: 4 - Beta",
+"Intended Audience :: Cloud Engineers",
+"Topic :: Software Development :: Infrastructure Tools",
+"License :: OSI Approved :: Apache Software License 2.0 (Apache-2.0)",
+"ProgrammingLanguage :: Python :: 3.12"
 ]
 
 [tool.poetry.urls]
-Homepage = "https://github.com/choatej/gcp-scanner"
-Documentation = "https://github.com/choatej/gcp-scanner/blob/main/README.md"
-Repository = "https://github.com/choatej/gcp-scanner.git"
 Issues = "https://github.com/choatej/gcp-scanner/issues"
 Changelog = "https://github.com/choatej/gcp-scanner/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
-python = ">=3.12.0"
-
-[tool.poetry.group.dev.dependencies]
+python = ">=3.12.4 <4.0.0"
+protobuf = "4.25.3"
 google-auth = "2.32.0"
 google-cloud-spanner = "3.47.0"
 google-cloud-resource-manager = "1.12.4"
 google-api-python-client = "2.137.0"
-plotly = "5.22.0"
-networkx = "3.3"
-numpy = "2.0.0"
-json2html = "1.3.0"
-oauth2client = "4.1.3"
 
-[tool.poetry.scripts]
-spanner = "spanner:main"
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+
+[tool.pytest.ini_options]
+markers = [
+    "acceptance: marks the test as a test to run at the end of development. It may have dependencies",
+    "unit: marks the test as a unit test with no dependencies",
+    "ci: marks the test as being part of the automated CI tests"
+]
 
 [build-system]
 requires = ["poetry-core"]

@@ -7,23 +7,11 @@ on:
     branches:
       - main
 jobs:
-  setup-python:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements.txt
-        working-directory: ./scanner
-
   lint:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Install Megalinter and run
         run: |
           curl -sL https://raw.githubusercontent.com/nvuillam/mega-linter/master/install.sh | bash
@@ -34,6 +22,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        sparse-checkout: visualizer
     - name: Read Node.js version from .node-version
       id: node_version
       run: echo ::set-output name=node_version::$(cat .node-version)
@@ -54,6 +44,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        sparse-checkout: visualizer
     - name: Read Node.js version from .node-version
       id: node_version
       run: echo ::set-output name=node_version::$(cat .node-version)
@@ -66,28 +58,47 @@ jobs:
       run: npm install
       working-directory: visualizer
     - name: test
-      run: npm test:dev
+      run: npm run test:dev
       working-directory: visualizer
 
   test-python:
-    runs-on: ubuntu-latest
+    # this doesn't work on ubuntu-latest for some reason
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Read Python Version from pyproject.toml
-      # use the existing python to get the right one
-      run: |
-          PYTHON_VERSION=$(cat pyproject.toml | grep -oP '(?<=python = ").*(?=")')
-          echo $PYTHON_VERSION > ${{github.workspace}}/.python-version
-      continue-on-error: true
-      working-directory: scanner
+      with:
+        sparse-checkout: scanner
     - name: Set up Python
+      id: setup-python
       uses: actions/setup-python@v5
+      with:
+       python-version-file: ./scanner/pyproject.toml
+    - name: Load cached Poetry installation
+      id: cached-poetry
+      uses: actions/cache@v4
+      with:
+        path: ~/.local
+        key: poetry-0
+    - name: install poetry
+      if: steps.cached-poetry.outputs.cache-hit != 'true'
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        virtualenvs-path: .venv
+        installer-parallel: true
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install -r requirements.txt
+        poetry lock
+        poetry install --with dev
       working-directory: scanner
     - name: test
-      run: pytest -s -v
+      run: poetry run pytest -m "not acceptance" -W ignore::DeprecationWarning
       working-directory: scanner

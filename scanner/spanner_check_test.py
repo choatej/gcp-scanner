@@ -1,9 +1,10 @@
 import os
-import unittest
-from spanner import get_projects, get_instances, get_tables, get_databases
+import pytest
+from scanner.spanner import get_instances, get_tables, get_databases
 
 
-class SpannerCheckTestCase(unittest.TestCase):
+@pytest.mark.acceptance
+class SpannerCheckTestCase:
     """
     SpannerCheckTestCase is a functional test of the logic to find Spanner databases.
     The inputs to the test should be a GCP project that contains at least one Spanner
@@ -15,11 +16,10 @@ class SpannerCheckTestCase(unittest.TestCase):
         - TEST_INSTANCE_ID - the Spanner instance name to check for databases
         - TEST_DATABASE_ID - the Spanner database name to test for tables
     """
-    def __init__(self, method_name='runTest'):
-        super().__init__(method_name)
-        self.project = os.getenv('TEST_PROJECT_ID', '')
-        self.instance = os.getenv('TEST_INSTANCE_ID', '')
-        self.database_id = os.getenv('TEST_DATABASE_ID', '')
+    def __init__(self):
+        self.project = os.getenv('TEST_PROJECT_ID', 'sandbox-20230804-c12cu6')
+        self.instance = os.getenv('TEST_INSTANCE_ID', 'projects/sandbox-20230804-c12cu6/instances/extra-org-test')
+        self.database_id = os.getenv('TEST_DATABASE_ID', 'projects/sandbox-20230804-c12cu6/instances/extra-org-test/databases/sample')
         missing_data = self.collect_missing_data()
         if missing_data != '':
             raise ValueError(f'missing required env var(s): {missing_data}')
@@ -37,7 +37,7 @@ class SpannerCheckTestCase(unittest.TestCase):
     def test_get_instances(self):
         project_id = self.project
         instances_pager = get_instances(project_id)
-        self.assertIsNotNone(list(instances_pager),'no instances found')
+        assert list(instances_pager) is not None, 'no instances found'
         # make sure we have something that can get passed along
         for instance in instances_pager:
             print(instance.name)
@@ -45,7 +45,7 @@ class SpannerCheckTestCase(unittest.TestCase):
     def test_get_databases(self):
         instance_name = self.instance
         db_pager = get_databases(instance_name)
-        self.assertIsNotNone(list(db_pager),'no databases found')
+        assert list(db_pager) is not None, 'no databases found'
         # make sure we have something that can get passed along
         for db in db_pager:
             print(db.name)
@@ -53,11 +53,7 @@ class SpannerCheckTestCase(unittest.TestCase):
     def test_get_tables(self):
         database_name = self.database_id
         table_pager = get_tables(database_name)
-        self.assertIsNotNone(list(table_pager), 'no tables found')
+        assert list(table_pager) is not None, 'no tables found'
         # make sure we have something that can get passed along
         for table in table_pager:
             print(table)
-
-
-if __name__ == '__main__':
-    unittest.main()
