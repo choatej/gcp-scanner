@@ -22,3 +22,8 @@ yarn-error.log
 venv/
 env/
 megalinter-reports
+.venv
+coverage
+junit.xml
+build
+junit
