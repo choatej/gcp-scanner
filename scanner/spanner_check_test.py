@@ -17,9 +17,9 @@ class SpannerCheckTestCase:
         - TEST_DATABASE_ID - the Spanner database name to test for tables
     """
     def __init__(self):
-        self.project = os.getenv('TEST_PROJECT_ID', 'sandbox-20230804-c12cu6')
-        self.instance = os.getenv('TEST_INSTANCE_ID', 'projects/sandbox-20230804-c12cu6/instances/extra-org-test')
-        self.database_id = os.getenv('TEST_DATABASE_ID', 'projects/sandbox-20230804-c12cu6/instances/extra-org-test/databases/sample')
+        self.project = os.getenv('TEST_PROJECT_ID', '')
+        self.instance = os.getenv('TEST_INSTANCE_ID', '')
+        self.database_id = os.getenv('TEST_DATABASE_ID', '')
         missing_data = self.collect_missing_data()
         if missing_data != '':
             raise ValueError(f'missing required env var(s): {missing_data}')

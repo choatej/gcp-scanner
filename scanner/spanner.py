@@ -1,12 +1,13 @@
 import json
 from argparse import ArgumentParser
 import logging
+import os
 from pathlib import Path
 import sys
 import subprocess
 
 import google.auth
-from google.cloud import spanner
+from google.cloud import spanner_v1
 from google.cloud.spanner_admin_database_v1 import DatabaseAdminClient
 from google.cloud.spanner_admin_instance_v1 import InstanceAdminClient
 from googleapiclient import discovery
@@ -56,8 +57,8 @@ def get_projects():
 
 def filter_projects(projects):
     return [project for project in projects if not
-                ('sandbox' in project['projectId'] or
-                 project['projectId'].startswith('sys-'))]
+            ('sandbox' in project['projectId'] or
+                project['projectId'].startswith('sys-'))]
 
 
 def describe_project(project_id):
@@ -116,14 +117,14 @@ def describe_database(database_id):
 
 def get_tables(database_id):
     project, instance_id, database_name = extract_principles(database_id)
-    client = spanner.Client(project=project)
+    client = spanner_v1.Client(project=project)
     instance = client.instance(instance_id)
     database = instance.database(database_name)
     with database.snapshot() as snapshot:
         results = snapshot.execute_sql("""
-            SELECT t.table_name 
-            FROM information_schema.tables t 
-            WHERE t.table_catalog = '' 
+            SELECT t.table_name
+            FROM information_schema.tables t
+            WHERE t.table_catalog = ''
             AND t.table_schema = ''
             AND t.table_name not in ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
 """)
@@ -135,17 +136,26 @@ def describe_table(database_id, table):
     """Get the schema for a table."""
     project_id, instance_id, database_name = extract_principles(database_id)
     logger.info(f'Describing table {database_name}/{table}')
-    client = spanner.Client(project=project_id)
+    client = spanner_v1.Client(project=project_id)
     instance = client.instance(instance_id)
     database = instance.database(database_name)
     schema = {}
+    query = """
+    SELECT column_name, spanner_type, is_nullable
+    FROM information_schema.columns
+    WHERE table_name = @table_name
+    ORDER BY ordinal_position
+"""
+    params = {
+        'table_name': table
+    }
+    param_types = {
+        'table_name': spanner_v1.Type(
+            type_url='type.googleapis.com/google.spanner.v1.TypeCode.STRING')
+    }
+
     with database.snapshot() as snapshot:
-        results = snapshot.execute_sql(f"""
-            SELECT column_name, spanner_type, is_nullable 
-            FROM information_schema.columns 
-            WHERE table_name = '{table}' 
-            ORDER BY ordinal_position
-        """)
+        results = snapshot.execute_sql(query, params=params, param_types=param_types)
         for row in results:
             column_name, spanner_type, is_nullable = row
             schema[column_name] = {
@@ -170,8 +180,8 @@ def visualize(data):
     json_file = 'spanner-tools/public/results.json'
     with open(json_file, 'w') as f:
         json.dump(data, f, indent=4)
-    subprocess.Popen(['npm start'], cwd='./spanner-tools',
-                                         shell=True)
+    subprocess.Popen(['npm start'], cwd=os.path.abspath('./spanner-tools'),
+                     shell=True)
     print('Press any key to exit')
     sys.stdin.readline()
     json_file_path = Path(json_file)
@@ -201,7 +211,8 @@ def remove_empty_elements(d):
     if not isinstance(d, dict):
         return d
 
-    keys_to_remove = [key for key, value in d.items() if isinstance(value, dict) and not value]
+    keys_to_remove = [key for key, value in d.items() if isinstance(value, dict)
+                      and not value]
     for key in keys_to_remove:
         del d[key]
 

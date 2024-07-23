@@ -1,37 +1,45 @@
-megalinter:
-  # General settings
-  files:
-    include:
-      - "**/*"  # Include all files in the repo
+EXCLUDED_DIRECTORIES:
+  - backup_restore
+  - __pycache__
+  - node_modules
+  - junit
+  - .ruff_cache
+  - .pytest_cache
+  - .idea
+  - scanner
+  - visualizer
+  - .git
+  - .github
 
-  # Linter configurations
-  linters:
-    eslint:
-      enabled: true
-      config_file: .eslintrc.json
-    flake8:
-      enabled: true
-      config_file: .flake8
+ENABLE_LINTERS:
+  - BASH_EXEC
+  - BASH_SHELLCHECK
+  - BASH_SHFMT
+  - COPYPASTE_JSCPD
+  - EDITORCONFIG_EDITORCONFIG_CHECKER
+  - ENV_DOTENV_LINTER
+  - JSON_JSONLINT
+  - JSON_PRETTIER
+  - JSON_V8R
+  - MARKDOWN_MARKDOWNLINT
+  - MARKDOWN_MARKDOWN_LINK_CHECK
+  - MARKDOWN_MARKDOWN_TABLE_FORMATTER
+  #  - MARKDOWN_REMARK_LINT - bugged
+  - REPOSITORY_CHECKOV
+  - REPOSITORY_DUSTILOCK
+  - REPOSITORY_GITLEAKS
+  - REPOSITORY_GIT_DIFF
+  - REPOSITORY_KICS
+  - REPOSITORY_LS_LINT
+  - REPOSITORY_SECRETLINT
+  - REPOSITORY_SEMGREP
+  - REPOSITORY_SYFT
+  #  - REPOSITORY_TRIVY - very picky
+  - REPOSITORY_TRIVY_SBOM
+  - REPOSITORY_TRUFFLEHOG
+  - XML_XMLLINT
+  - YAML_PRETTIER
+  - YAML_V8R
+  - YAML_YAMLLINT
 
-  # Global options
-  options:
-    concurrency: 4
-
-  # Exclude specific paths or files if needed
-  exclude_paths:
-    - "node_modules/**"
-
-  # Language specific configurations
-  languages:
-    nodejs:
-      files:
-        include:
-          - "**/*.js"
-      linters:
-        - eslint
-    python:
-      files:
-        include:
-          - "**/*.py"
-      linters:
-        - flake8
+REPOSITORY_TRIVY_ARGUMENTS: --skip-dirs "**/node_modules"

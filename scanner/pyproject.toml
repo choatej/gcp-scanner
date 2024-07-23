@@ -39,6 +39,8 @@ google-api-python-client = "2.137.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
+flake8 = "^7.1.0"
+pylint = "^3.2.5"
 
 [tool.pytest.ini_options]
 markers = [

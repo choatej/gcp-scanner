@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import ReactJson from "@microlink/react-json-view";
+// import ReactJson from "@microlink/react-json-view";
 
 function App() {
   const [jsonData, setJsonData] = useState(null);
@@ -26,17 +26,18 @@ function App() {
     return <div>Loading...</div>;
   }
   return (
-    <ReactJson
-        src={jsonData}
-        name={"projects"}
-        theme={"brewer"}
-        iconStyle={"square"}
-        indentWidth={4}
-        collapsed={true}
-        displayObjectSize={false}
-        displayDataTypes={false}
-        sortKeys={true}
-    />
+    // <ReactJson
+    //     src={jsonData}
+    //     name={"projects"}
+    //     theme={"brewer"}
+    //     iconStyle={"square"}
+    //     indentWidth={4}
+    //     collapsed={true}
+    //     displayObjectSize={false}
+    //     displayDataTypes={false}
+    //     sortKeys={true}
+    // />
+      ""
   );
 }
 

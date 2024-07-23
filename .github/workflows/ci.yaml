@@ -1,3 +1,4 @@
+---
 name: CI
 on:
   push:
@@ -6,17 +7,17 @@ on:
   pull_request:
     branches:
       - main
+permissions: read-all
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Install Megalinter and run
-        run: |
-          curl -sL https://raw.githubusercontent.com/nvuillam/mega-linter/master/install.sh | bash
-          ./bin/mega-linter-runner
-
+      - name: Run Megalinter
+        uses: oxsecurity/megalinter@bacb5f8674e3730b904ca4d20c8bd477bc51b1a7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build-react:
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +27,7 @@ jobs:
         sparse-checkout: visualizer
     - name: Read Node.js version from .node-version
       id: node_version
-      run: echo ::set-output name=node_version::$(cat .node-version)
+      run: echo "node_version=$(cat .node-version)" >> "${GITHUB_OUTPUT}"
       working-directory: ${{ github.workspace }}/visualizer
     - name: Setup Node.js
       uses: actions/setup-node@v4.0.3
@@ -48,7 +49,7 @@ jobs:
         sparse-checkout: visualizer
     - name: Read Node.js version from .node-version
       id: node_version
-      run: echo ::set-output name=node_version::$(cat .node-version)
+      run: echo "node_version=$(cat .node-version)" >> "${GITHUB_OUTPUT}"
       working-directory: ${{ github.workspace }}/visualizer
     - name: Setup Node.js
       uses: actions/setup-node@v4.0.3
@@ -82,7 +83,7 @@ jobs:
         key: poetry-0
     - name: install poetry
       if: steps.cached-poetry.outputs.cache-hit != 'true'
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@93ada01c735cc8a383ce0ce2ae205a21c415379b
       with:
         virtualenvs-create: true
         virtualenvs-in-project: true
